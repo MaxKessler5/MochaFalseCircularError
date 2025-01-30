@@ -1,4 +1,3 @@
-# FILEPATH: /C:/Projects/MochaFalseCircularError/history.txt
 npm init -y
 sed -i 's/"type": "commonjs"/"type": "module"/' package.json
 echo "// Entry point for the application" > index.js
