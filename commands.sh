@@ -6,5 +6,5 @@ sed -i 's/"test":.*/"test": "mocha"/' package.json
 npm install mocha
 mkdir test
 echo "import \"../index.js\";" > test/test.js
-npm test > output.txt
+npm test > npm_test_output.log
 
