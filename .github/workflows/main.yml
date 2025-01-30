@@ -1,4 +1,4 @@
-name: Run Shell Script and Check Output
+name: Run Shell Script and Capture Output
 
 on:
   push:
@@ -15,16 +15,19 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Source the Shell Script and Check stdout
-        run: |
-          OUTPUT=$(source ./commands.sh | tee /dev/tty)  # Capture stdout
-          echo "Script Output: $OUTPUT"
+      - name: Grant execute permissions to the script
+        run: chmod +x commands.sh  # Ensure script is executable
 
-          if echo "$OUTPUT" | grep -q "ERR_REQUIRE_CYCLE_MODULE"; then
-            echo "✅ Bug successfully reproduced!"
+      - name: Run commands.sh and pipe output
+        run: |
+          ./commands.sh 2>&1 | tee output.txt  # Pipe stdout & stderr to output.txt
+
+      - name: Check for expected string in output
+        run: |
+          if grep -q "ERR_REQUIRE_CYCLE_MODULE" output.txt; then
+            echo "✅ Expected string found! Bug reproduced!"
             exit 0  # Success
           else
-            echo "❌ Bug NOT reproduced!"
+            echo "❌ Expected string NOT found! Bug did not reproduce!"
             exit 1  # Fail workflow
           fi
-        shell: bash
