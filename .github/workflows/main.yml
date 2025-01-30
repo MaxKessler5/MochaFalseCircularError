@@ -1,4 +1,4 @@
-name: Run Shell Script and Capture Output
+name: Run Shell Script on Multiple Environments
 
 on:
   push:
@@ -10,17 +10,28 @@ on:
 
 jobs:
   run-script:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]  # Define multiple OS
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Grant execute permissions to the script
+      - name: Grant execute permissions to the script (Linux/macOS)
+        if: runner.os != 'Windows'
         run: chmod +x commands.sh  # Ensure script is executable
 
-      - name: Run commands.sh and pipe output
+      - name: Run commands.sh and pipe output (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
           ./commands.sh 2>&1 | tee output.txt  # Pipe stdout & stderr to output.txt
+
+      - name: Run commands.sh and pipe output (Windows)
+        if: runner.os == 'Windows'
+        shell: bash  # Use Bash shell on Windows
+        run: |
+          bash commands.sh 2>&1 | tee output.txt  # Execute script via Bash
 
       - name: Check for expected string in output
         run: |
@@ -31,3 +42,4 @@ jobs:
             echo "❌ Expected string NOT found! Bug did not reproduce!"
             exit 1  # Fail workflow
           fi
+        shell: bash  # Ensure it runs correctly on all platforms
